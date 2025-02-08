@@ -1,7 +1,7 @@
 """
 Data from a single market for a BLP demand model
 """
-struct MarketData{VType <: AbstractVector, MType <: AbstractMatrix, IDType <: AbstractVector}
+struct MarketData{VType<:AbstractVector,MType<:AbstractMatrix,IDType<:AbstractVector}
   """
   `J` vector of shares
   """
@@ -40,35 +40,35 @@ const BLPData = Array{MarketData,1}
 """
 Constructs data for BLP demand model from arrays. Compared to [`MarketData`](@ref), each argument should have one more dimension with length `T`=number of markets
 """
-function blpdata(s::AbstractMatrix, 
-                 x::AbstractArray{T, 3} where T,
-                 ν::AbstractArray{T,3} where T,
-                 ivdemand::AbstractArray{T,3} where T,
-                 w::AbstractArray{T, 3} where T,
-                 ivsupply::AbstractArray{T, 3} where T;
-                 firmid=1:size(s,1) )
-  J,T = size(s)
+function blpdata(s::AbstractMatrix,
+  x::AbstractArray{T,3} where {T},
+  ν::AbstractArray{T,3} where {T},
+  ivdemand::AbstractArray{T,3} where {T},
+  w::AbstractArray{T,3} where {T},
+  ivsupply::AbstractArray{T,3} where {T};
+  firmid=1:size(s, 1))
+  J, T = size(s)
   dat = Array{MarketData,1}(undef, T)
   for t in 1:T
-    dat[t] = MarketData(s[:,t],x[:,:,t],w[:,:,t],firmid,ivdemand[:,:,t], ivsupply[:,:,t], ν[:,:,t])
+    dat[t] = MarketData(s[:, t], x[:, :, t], w[:, :, t], firmid, ivdemand[:, :, t], ivsupply[:, :, t], ν[:, :, t])
   end
-  return(dat)
+  return (dat)
 end
 
 """
 Constructs data for IV random coefficients logit model from arrays. Compared to [`MarketData`](@ref), each argument should have one more dimension with length `T`=number of markets
 """
-function blpdata(s::AbstractMatrix, 
-                 x::AbstractArray{T, 3} where T,
-                 ν::AbstractArray{T,3} where T,
-                 ivdemand::AbstractArray{T,3} where T;
-                 firmid=1:size(s,1) )
-  J,T = size(s)
+function blpdata(s::AbstractMatrix,
+  x::AbstractArray{T,3} where {T},
+  ν::AbstractArray{T,3} where {T},
+  ivdemand::AbstractArray{T,3} where {T};
+  firmid=1:size(s, 1))
+  J, T = size(s)
   dat = Array{MarketData,1}(undef, T)
   for t in 1:T
-    dat[t] = MarketData(s[:,t],x[:,:,t],zeros(0,0),firmid,ivdemand[:,:,t],zeros(0,0), ν[:,:,t])
+    dat[t] = MarketData(s[:, t], x[:, :, t], zeros(0, 0), firmid, ivdemand[:, :, t], zeros(0, 0), ν[:, :, t])
   end
-  return(dat)
+  return (dat)
 end
 
 
@@ -98,26 +98,27 @@ Construct BLPData from a DataFrame.
 See also [`MarketData`](@ref)
 """
 function blpdata(df::DataFrame,
-                 mid::Symbol,
-                 firmid::Symbol,
-                 s::Symbol,                 
-                 x::Vector{Symbol},
-                 w::Vector{Symbol},
-                 zd::Vector{Symbol},
-                 zs::Vector{Symbol},
-                 ν::AbstractArray{T,3} where T)
+  mid::Symbol,
+  firmid::Symbol,
+  s::Symbol,
+  x::Vector{Symbol},
+  w::Vector{Symbol},
+  zd::Vector{Symbol},
+  zs::Vector{Symbol},
+  ν::AbstractArray{T,3} where {T})
 
-  tvals = unique(df[!,mid])
+  #@infiltrate
+  tvals = unique(df[!, mid])
   T = length(tvals)
   dat = Array{MarketData,1}(undef, T)
   for t in 1:T
-    i = findall(df[!,mid] .== tvals[t])
-    dat[t] = MarketData(df[i,s],convert(Matrix,df[i,x])',convert(Matrix,df[i,w])',
-                        df[i,firmid], convert(Matrix,df[i, zd])', convert(Matrix,df[i, zs])',
-                        ν[:,:,t])
+    i = findall(df[!, mid] .== tvals[t])
+    dat[t] = MarketData(df[i, s], Matrix(Matrix(df[i, x])'), Matrix(Matrix(df[i, w])'),
+      df[i, firmid], Matrix(Matrix(df[i, zd])'), Matrix(Matrix(df[i, zs])'),
+      ν[:, :, t])
   end
-  return(dat)
-  
+  return (dat)
+
 end
 
 
@@ -129,8 +130,8 @@ Loads data from Berry, Levinsohn, and Pakes (1999).
 Returns a DataFrame.
 """
 function data_blp1999()
-  csvfile=normpath(joinpath(dirname(Base.pathof(BLPDemand)),"..","data","blp_1999_data.csv"))
+  csvfile = normpath(joinpath(dirname(Base.pathof(BLPDemand)), "..", "data", "blp_1999_data.csv"))
   dt = CSV.read(csvfile)
-  return(dt)
+  return (dt)
 end
 
